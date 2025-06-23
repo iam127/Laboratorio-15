@@ -1,0 +1,132 @@
+test_results = []
+
+def record_test(test_name, condition):
+    emoji = "✅" if condition else "❌"
+    test_results.append(f"{emoji} {test_name}")
+
+class Graph:
+    def __init__(self):
+        self.adjacency_list = {}
+    
+    def add_vertex(self, vertex):
+        if vertex not in self.adjacency_list:
+            self.adjacency_list[vertex] = []
+    
+    def add_edge(self, vertex1, vertex2):
+        self.add_vertex(vertex1)
+        self.add_vertex(vertex2)
+        if vertex2 not in self.adjacency_list[vertex1]:
+            self.adjacency_list[vertex1].append(vertex2)
+        if vertex1 not in self.adjacency_list[vertex2]:
+            self.adjacency_list[vertex2].append(vertex1)
+    
+    def get_degree(self, vertex):
+        """Return number of connections for given vertex"""
+        if vertex not in self.adjacency_list:
+            return 0
+        return len(self.adjacency_list[vertex])
+    
+    def find_all_paths(self, start_vertex, end_vertex, max_length=None):
+        """Find all possible paths between start and end vertices"""
+        if start_vertex not in self.adjacency_list or end_vertex not in self.adjacency_list:
+            return []
+        
+        all_paths = []
+        
+        def dfs(current, target, path, visited):
+            # Si llegamos al destino, agregamos el camino
+            if current == target:
+                all_paths.append(path[:])  # Copia del camino
+                return
+            
+            # Si hay límite de longitud y lo excedemos, retornamos
+            if max_length and len(path) >= max_length:
+                return
+            
+            # Exploramos vecinos no visitados
+            for neighbor in self.adjacency_list[current]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    path.append(neighbor)
+                    dfs(neighbor, target, path, visited)
+                    # Backtracking
+                    path.pop()
+                    visited.remove(neighbor)
+        
+        # Iniciamos DFS desde el vértice de inicio
+        visited = {start_vertex}
+        dfs(start_vertex, end_vertex, [start_vertex], visited)
+        
+        return all_paths
+    
+    def get_connected_components(self):
+        """Return list of connected components (separate graph sections)"""
+        if not self.adjacency_list:
+            return []
+        
+        visited = set()
+        components = []
+        
+        def dfs_component(vertex, current_component):
+            visited.add(vertex)
+            current_component.append(vertex)
+            
+            for neighbor in self.adjacency_list[vertex]:
+                if neighbor not in visited:
+                    dfs_component(neighbor, current_component)
+        
+        # Visitamos todos los vértices
+        for vertex in self.adjacency_list:
+            if vertex not in visited:
+                component = []
+                dfs_component(vertex, component)
+                components.append(sorted(component))  # Ordenamos para consistencia
+        
+        return sorted(components)  # Ordenamos componentes por el primer elemento
+
+def test_1_5():
+    graph = Graph()
+    
+    # Build complex test graph
+    graph.add_edge("Lima", "Cusco")
+    graph.add_edge("Lima", "Arequipa")
+    graph.add_edge("Cusco", "Arequipa")
+    graph.add_edge("Trujillo", "Piura")  # Separate component
+    
+    # 1.5.1 Degree calculation
+    lima_degree = graph.get_degree("Lima")
+    print(f"Lima degree: {lima_degree}")
+    record_test("1.5.1 Degree calculation", lima_degree == 2)
+    
+    # 1.5.2 Multiple paths finding
+    paths = graph.find_all_paths("Lima", "Arequipa", max_length=3)
+    print(f"Paths from Lima to Arequipa: {paths}")
+    has_multiple_paths = len(paths) >= 2
+    record_test("1.5.2 Multiple paths finding", has_multiple_paths)
+    
+    # 1.5.3 Connected components
+    components = graph.get_connected_components()
+    print(f"Connected components: {components}")
+    has_two_components = len(components) == 2
+    record_test("1.5.3 Connected components", has_two_components)
+    
+    # 1.5.4 Empty graph analysis
+    empty_graph = Graph()
+    empty_components = empty_graph.get_connected_components()
+    print(f"Empty graph components: {empty_components}")
+    record_test("1.5.4 Empty graph analysis", empty_components == [])
+    
+    # 1.5.5 Non-existent vertex handling
+    degree = graph.get_degree("NonExistent")
+    print(f"Non-existent vertex degree: {degree}")
+    record_test("1.5.5 Non-existent vertex handling", degree == 0 or degree is None)
+
+# 🚀 Run tests
+test_1_5()
+
+# 📋 Summary
+print("\n" + "="*50)
+print("TEST RESULTS:")
+print("="*50)
+for r in test_results:
+    print(r)
