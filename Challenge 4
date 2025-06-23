@@ -1,0 +1,92 @@
+# List to store test results with checkmarks or crosses
+test_results = []
+
+# Function to record test results
+def record_test(test_name, condition):
+    emoji = "✅" if condition else "❌"  # Select emoji based on condition
+    test_results.append(f"{emoji} {test_name}")  # Append formatted result
+
+# Class representing an undirected graph
+class Graph:
+    def __init__(self):
+        self.adjacency_list = {}  # Dictionary to store adjacency list
+
+    # Add a vertex to the graph if not present
+    def add_vertex(self, vertex):
+        if vertex not in self.adjacency_list:
+            self.adjacency_list[vertex] = []
+
+    # Add an undirected edge between two vertices
+    def add_edge(self, vertex1, vertex2):
+        self.add_vertex(vertex1)  # Ensure vertex1 exists
+        self.add_vertex(vertex2)  # Ensure vertex2 exists
+        # Add connection both ways since it's undirected
+        if vertex2 not in self.adjacency_list[vertex1]:
+            self.adjacency_list[vertex1].append(vertex2)
+        if vertex1 not in self.adjacency_list[vertex2]:
+            self.adjacency_list[vertex2].append(vertex1)
+
+    # Find shortest path using Breadth-First Search
+    def find_path(self, start_vertex, end_vertex):
+        if start_vertex == end_vertex:
+            return [start_vertex]  # Return trivial path to itself
+
+        visited = set()  # Set to keep track of visited vertices
+        queue = [(start_vertex, [start_vertex])]  # Queue with (current_vertex, path)
+
+        while queue:
+            current, path = queue.pop(0)  # Dequeue the first element
+            if current in visited:
+                continue  # Skip if already visited
+
+            visited.add(current)  # Mark as visited
+
+            # Iterate over all neighbors
+            for neighbor in self.adjacency_list.get(current, []):
+                if neighbor == end_vertex:
+                    return path + [neighbor]  # Path found
+                queue.append((neighbor, path + [neighbor]))  # Enqueue new path
+
+        return []  # Return empty list if no path found
+
+    # Check if two vertices are connected
+    def is_connected(self, vertex1, vertex2):
+        return bool(self.find_path(vertex1, vertex2))  # True if path exists
+
+# Test suite to validate graph behavior
+def test_1_4():
+    graph = Graph()
+
+    # Create graph: Lima -- Cusco -- Arequipa; Trujillo is isolated
+    graph.add_edge("Lima", "Cusco")
+    graph.add_edge("Cusco", "Arequipa")
+    graph.add_vertex("Trujillo")  # No edges
+
+    # Test 1.4.1: Direct connection between Lima and Cusco
+    path = graph.find_path("Lima", "Cusco")
+    record_test("1.4.1 Direct connection path", path == ["Lima", "Cusco"])
+
+    # Test 1.4.2: Indirect path Lima -> Cusco -> Arequipa
+    path = graph.find_path("Lima", "Arequipa")
+    is_valid_path = len(path) == 3 and path[0] == "Lima" and path[-1] == "Arequipa"
+    record_test("1.4.2 Indirect connection path", is_valid_path)
+
+    # Test 1.4.3: No path between Lima and Trujillo
+    path = graph.find_path("Lima", "Trujillo")
+    record_test("1.4.3 No path case", path == [])
+
+    # Test 1.4.4: Path to itself should return single-element list
+    path = graph.find_path("Lima", "Lima")
+    record_test("1.4.4 Self path", path == ["Lima"])
+
+    # Test 1.4.5: Check connectivity
+    connected = graph.is_connected("Lima", "Arequipa")  # Should be True
+    not_connected = graph.is_connected("Lima", "Trujillo")  # Should be False
+    record_test("1.4.5 Connectivity check", connected and not not_connected)
+
+# Run test suite
+test_1_4()
+
+# Print test results
+for r in test_results:
+    print(r)
