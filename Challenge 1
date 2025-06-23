@@ -1,0 +1,47 @@
+test_results = []
+def record_test(test_name, condition):
+    emoji = "✅" if condition else "❌"
+    test_results.append(f"{emoji} {test_name}")
+
+class Graph:
+    def __init__(self):
+        # Inicializa una lista de adyacencia vacía para representar el grafo
+        self.adjacency_list = {}
+    
+    def get_vertices(self):
+        # Devuelve una lista con todas las claves del diccionario (los vértices)
+        return list(self.adjacency_list.keys())
+    
+    def get_vertex_count(self):
+        # Devuelve la cantidad de vértices (longitud del diccionario)
+        return len(self.adjacency_list)
+    
+    def has_vertex(self, vertex):
+        # Verifica si un vértice está en la lista de adyacencia
+        return vertex in self.adjacency_list
+
+def test_1_1():
+    # 1.1.1 Empty graph initialization
+    graph = Graph()
+    record_test("1.1.1 Empty graph initialization", graph.get_vertex_count() == 0)
+    
+    # 1.1.2 Vertex counting
+    graph.adjacency_list = {"Lima": [], "Cusco": []}  # Simula añadir vértices
+    record_test("1.1.2 Vertex counting", graph.get_vertex_count() == 2)
+    
+    # 1.1.3 Vertex existence check
+    record_test("1.1.3 Vertex existence check", graph.has_vertex("Lima") == True)
+    
+    # 1.1.4 Empty graph edge case
+    empty_graph = Graph()
+    record_test("1.1.4 Empty graph edge case", empty_graph.has_vertex("Lima") == False)
+    
+    # 1.1.5 Type validation
+    record_test("1.1.5 Type validation", isinstance(graph.get_vertices(), list))
+
+# 🚀 Run tests
+test_1_1()
+
+# 📋 Summary
+for r in test_results:
+    print(r)
